@@ -10,7 +10,15 @@ class EmployeesController < ApplicationController
 
   # GET /employees/1
   def show
-    render json: @employee
+    @employee = Employee.find(params[:id])
+    @absence_requests = @employee.absence_requests
+    @days_absent = @employee.days_absent
+
+    render json: {
+      employee: @employee,
+      absence_requests: @absence_requests,
+      days_absent: @days_absent
+    }
   end
 
   # POST /employees
