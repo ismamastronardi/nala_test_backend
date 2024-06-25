@@ -1,12 +1,17 @@
 class AbsenceRequestsController < ApplicationController
+  before_action :set_employee, only: [:index, :create]
   before_action :set_absence_request, only: [:show, :update, :destroy]
 
-  # GET /absence_requests
+  # GET /requests
   def index
-    @absence_requests = AbsenceRequest.all
-
-    render json: @absence_requests
+    if @employee.present?
+      @requests = @employee.absence_requests
+    else
+      @requests = AbsenceRequest.all
+    end
+    render json: @requests
   end
+
 
   # GET /absence_requests/1
   def show
@@ -15,7 +20,12 @@ class AbsenceRequestsController < ApplicationController
 
   # POST /absence_requests
   def create
-    @absence_request = AbsenceRequest.new(absence_request_params)
+    unless @employee
+      render json: { error: "Employee not found" }, status: :not_found
+      return
+    end
+
+    @absence_request = @employee.absence_requests.new(absence_request_params)
 
     if @absence_request.save
       render json: @absence_request, status: :created, location: @absence_request
@@ -44,8 +54,12 @@ class AbsenceRequestsController < ApplicationController
       @absence_request = AbsenceRequest.find(params[:id])
     end
 
+    def set_employee
+      @employee = Employee.find_by(id: params[:employee_id])
+    end
+  
     # Only allow a list of trusted parameters through.
     def absence_request_params
-      params.require(:absence_request).permit(:employee_id, :start_date, :end_date, :type, :reason, :status)
+      params.require(:absence_request).permit(:employee_id, :start_date, :end_date, :request_type, :reason, :status)
     end
 end
