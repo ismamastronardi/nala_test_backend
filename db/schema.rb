@@ -10,10 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_06_25_195846) do
+ActiveRecord::Schema.define(version: 2024_06_25_202609) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "absence_requests", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.string "request_type", null: false
+    t.string "reason"
+    t.string "status", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["employee_id"], name: "index_absence_requests_on_employee_id"
+  end
 
   create_table "employees", force: :cascade do |t|
     t.string "name", limit: 255, null: false
@@ -22,4 +34,5 @@ ActiveRecord::Schema.define(version: 2024_06_25_195846) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  add_foreign_key "absence_requests", "employees"
 end
