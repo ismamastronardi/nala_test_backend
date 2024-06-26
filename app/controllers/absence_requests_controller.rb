@@ -14,6 +14,9 @@ class AbsenceRequestsController < ApplicationController
     else
       absence_requests = AbsenceRequest.all
     end
+    if params[:status].present?
+      absence_requests = absence_requests.where(status: params[:status])
+    end
     @pagy, paginated_absence_requests = pagy(absence_requests, items: 10)
     render json: {absence_request: paginated_absence_requests, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
   end
