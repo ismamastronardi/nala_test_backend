@@ -1,4 +1,5 @@
 class AbsenceRequestsController < ApplicationController
+  before_action :authenticate_user
   before_action :set_employee, only: [:index, :create]
   before_action :set_absence_request, only: [:show, :update, :destroy]
 
@@ -60,6 +61,7 @@ class AbsenceRequestsController < ApplicationController
   
     # Only allow a list of trusted parameters through.
     def absence_request_params
-      params.require(:absence_request).permit(:employee_id, :start_date, :end_date, :request_type, :reason, :status)
+      params.require(:absence_request).permit(:employee_id, :start_date, :end_date, :request_type
+      , :reason, :status)
     end
 end
