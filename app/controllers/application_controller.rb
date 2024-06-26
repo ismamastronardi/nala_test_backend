@@ -5,4 +5,19 @@ class ApplicationController < ActionController::API
     devise_parameter_sanitizer.permit(:sign_up, keys: %i[email])
     devise_parameter_sanitizer.permit(:account_update, keys: %i[email])
   end
+  def authenticate_user
+    token = request.headers['Authorization']&.split&.last
+
+    unless token
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+      return
+    end
+
+    begin
+      secret_key = Rails.application.credentials.devise_jwt_secret_key
+      JWT.decode(token, secret_key, true)
+    rescue JWT::DecodeError
+      render json: { error: 'Invalid token' }, status: :unauthorized
+    end
+  end
 end
