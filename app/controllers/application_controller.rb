@@ -1,10 +1,12 @@
 class ApplicationController < ActionController::API
   before_action :configure_permitted_parameters, if: :devise_controller?
   protected
+
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: %i[email])
     devise_parameter_sanitizer.permit(:account_update, keys: %i[email])
   end
+
   def authenticate_user
     token = request.headers['Authorization']&.split&.last
 
@@ -19,5 +21,6 @@ class ApplicationController < ActionController::API
     rescue JWT::DecodeError
       render json: { error: 'Invalid token' }, status: :unauthorized
     end
+
   end
 end

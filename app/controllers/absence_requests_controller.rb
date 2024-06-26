@@ -1,4 +1,8 @@
+require 'pagy/extras/metadata'
+
 class AbsenceRequestsController < ApplicationController
+  include Pagy::Backend
+
   before_action :authenticate_user
   before_action :set_employee, only: [:index, :create]
   before_action :set_absence_request, only: [:show, :update, :destroy]
@@ -6,13 +10,13 @@ class AbsenceRequestsController < ApplicationController
   # GET /requests
   def index
     if @employee.present?
-      @requests = @employee.absence_requests
+      absence_requests = @employee.absence_requests
     else
-      @requests = AbsenceRequest.all
+      absence_requests = AbsenceRequest.all
     end
-    render json: @requests
+    @pagy, paginated_absence_requests = pagy(absence_requests, items: 10)
+    render json: {absence_request: paginated_absence_requests, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
   end
-
 
   # GET /absence_requests/1
   def show
@@ -61,7 +65,6 @@ class AbsenceRequestsController < ApplicationController
   
     # Only allow a list of trusted parameters through.
     def absence_request_params
-      params.require(:absence_request).permit(:employee_id, :start_date, :end_date, :request_type
-      , :reason, :status)
+      params.require(:absence_request).permit(:employee_id, :start_date, :end_date, :request_type, :reason, :status)
     end
 end

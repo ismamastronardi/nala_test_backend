@@ -1,12 +1,16 @@
+require 'pagy/extras/metadata'
+
 class EmployeesController < ApplicationController
+  include Pagy::Backend
+
   before_action :authenticate_user
   before_action :set_employee, only: [:show, :update, :destroy]
 
   # GET /employees
   def index
     @employees = Employee.all
-
-    render json: @employees
+    @pagy, paginated_employees = pagy(@employees, items: 1)
+    render json: {employees: paginated_employees, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
   end
 
   # GET /employees/1
