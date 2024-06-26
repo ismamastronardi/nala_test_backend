@@ -9,6 +9,15 @@ class EmployeesController < ApplicationController
   # GET /employees
   def index
     @employees = Employee.all
+
+    if params[:name].present?
+      @employees = @employees.where("name LIKE ?", "%#{params[:name]}%")
+    end
+
+    if params[:email].present?
+      @employees = @employees.where("email LIKE ?", "%#{params[:email]}%")
+    end
+
     @pagy, paginated_employees = pagy(@employees, items: 1)
     render json: {employees: paginated_employees, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
   end
