@@ -23,8 +23,15 @@ class AbsenceRequestsController < ApplicationController
     if params[:end_date].present?
       absence_requests = absence_requests.where("start_date <= ?", params[:end_date])
     end
+    if params[:request_type].present?
+      absence_requests = absence_requests.where(request_type: params[:request_type])
+    end
     @pagy, paginated_absence_requests = pagy(absence_requests, items: 10)
-    render json: {absence_request: paginated_absence_requests, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
+    render json: {
+      count: absence_requests.count,
+      absence_request: paginated_absence_requests,
+      pagy: { pages: @pagy.pages, current_page: @pagy.page }
+    }
   end
 
   # GET /absence_requests/1
