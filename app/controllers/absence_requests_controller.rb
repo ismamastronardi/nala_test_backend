@@ -14,8 +14,24 @@ class AbsenceRequestsController < ApplicationController
     else
       absence_requests = AbsenceRequest.all
     end
-    @pagy, paginated_absence_requests = pagy(absence_requests, items: 10)
-    render json: {absence_request: paginated_absence_requests, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
+    if params[:status].present?
+      absence_requests = absence_requests.where(status: params[:status])
+    end
+    if params[:start_date].present?
+      absence_requests = absence_requests.where("start_date >= ?", params[:start_date])
+    end
+    if params[:end_date].present?
+      absence_requests = absence_requests.where("start_date <= ?", params[:end_date])
+    end
+    if params[:request_type].present?
+      absence_requests = absence_requests.where(request_type: params[:request_type])
+    end
+    @pagy, paginated_absence_requests = pagy(absence_requests, items: 4)
+    render json: {
+      count: absence_requests.count,
+      absence_requests: paginated_absence_requests,
+      pagy: { pages: @pagy.pages, current_page: @pagy.page }
+    }
   end
 
   # GET /absence_requests/1
@@ -51,6 +67,7 @@ class AbsenceRequestsController < ApplicationController
   # DELETE /absence_requests/1
   def destroy
     @absence_request.destroy
+    render json: { message: "Absence request deleted successfully" }
   end
 
   private

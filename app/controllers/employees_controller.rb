@@ -9,7 +9,16 @@ class EmployeesController < ApplicationController
   # GET /employees
   def index
     @employees = Employee.all
-    @pagy, paginated_employees = pagy(@employees, items: 1)
+
+    if params[:name].present?
+      @employees = @employees.where("name LIKE ?", "%#{params[:name]}%")
+    end
+
+    if params[:email].present?
+      @employees = @employees.where("email LIKE ?", "%#{params[:email]}%")
+    end
+
+    @pagy, paginated_employees = pagy(@employees, items: 3)
     render json: {employees: paginated_employees, pagy: { pages: @pagy.pages, current_page: @pagy.page }}
   end
 
@@ -29,7 +38,6 @@ class EmployeesController < ApplicationController
   # POST /employees
   def create
     @employee = Employee.new(employee_params)
-
     if @employee.save
       render json: @employee, status: :created, location: @employee
     else
@@ -48,7 +56,17 @@ class EmployeesController < ApplicationController
 
   # DELETE /employees/1
   def destroy
-    @employee.destroy
+    ActiveRecord::Base.transaction do
+      @employee.absence_requests.destroy_all
+      @employee.destroy
+    end
+    render json: {message: "Employee and associated absence requests deleted successfully"}
+  rescue ActiveRecord::RecordNotDestroyed
+    render json: {message: "Employee and associated absence requests couldn't be deleted"}, status: :unprocessable_entity
+  rescue ActiveRecord::RecordNotFound
+    render json: {message: "Employee not found"}, status: :not_found
+  rescue StandardError => e
+    render json: {message: e.message}, status: :unprocessable_entity
   end
 
   private
