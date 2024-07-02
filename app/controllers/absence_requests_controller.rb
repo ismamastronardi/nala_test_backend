@@ -1,4 +1,5 @@
 require 'pagy/extras/metadata'
+require 'pagy/extras/array' 
 
 class AbsenceRequestsController < ApplicationController
   include Pagy::Backend
@@ -26,7 +27,23 @@ class AbsenceRequestsController < ApplicationController
     if params[:request_type].present?
       absence_requests = absence_requests.where(request_type: params[:request_type])
     end
-    @pagy, paginated_absence_requests = pagy(absence_requests, items: 4)
+
+    completed_requests = absence_requests.map do |request|
+      employee = Employee.find(request.employee_id)
+      {
+        id: request.id,
+        employee_name: employee.name,
+        employee_email: employee.email,
+        start_date: request.start_date,
+        end_date: request.end_date,
+        request_type: request.request_type,
+        reason: request.reason,
+        status: request.status,
+        days_requested: request.days_requested
+      }
+    end
+
+    @pagy, paginated_absence_requests = pagy_array(completed_requests, items: 4)
     render json: {
       count: absence_requests.count,
       absence_requests: paginated_absence_requests,
