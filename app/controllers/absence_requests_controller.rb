@@ -26,10 +26,10 @@ class AbsenceRequestsController < ApplicationController
     if params[:request_type].present?
       absence_requests = absence_requests.where(request_type: params[:request_type])
     end
-    @pagy, paginated_absence_requests = pagy(absence_requests, items: 10)
+    @pagy, paginated_absence_requests = pagy(absence_requests, items: 1)
     render json: {
       count: absence_requests.count,
-      absence_request: paginated_absence_requests,
+      absence_requests: paginated_absence_requests,
       pagy: { pages: @pagy.pages, current_page: @pagy.page }
     }
   end
@@ -67,6 +67,7 @@ class AbsenceRequestsController < ApplicationController
   # DELETE /absence_requests/1
   def destroy
     @absence_request.destroy
+    render json: { message: "Absence request deleted successfully" }
   end
 
   private
