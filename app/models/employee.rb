@@ -10,4 +10,8 @@ class Employee < ApplicationRecord
     absence_requests.where.not(status: "rejected").sum(&:days_requested)
   end
 
+  def days_requested
+    absence_requests.sum(&:days_requested)
+  end
+
 end
